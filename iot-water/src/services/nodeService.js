@@ -1,15 +1,16 @@
-// Servicio para manejar las operaciones CRUD de nodos
-// En una aplicación real, esto se conectaría con una API
+import axios from 'axios'
 
-// Datos simulados - en producción esto vendría de una base de datos
-let nodes = [
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/nodos'
+
+// Datos mock locales
+let mockNodes = [
   {
     id: 1,
     codigo: 'NODO-001',
     tipo: 'Sensor de Temperatura',
     fechaInstalacion: '2024-01-15',
     bateria: 85,
-    descripcion: 'Sensor ubicado en el invernadero principal'
+    activo: true
   },
   {
     id: 2,
@@ -17,7 +18,7 @@ let nodes = [
     tipo: 'Sensor de Humedad',
     fechaInstalacion: '2024-02-20',
     bateria: 92,
-    descripcion: 'Sensor de humedad del suelo'
+    activo: true
   },
   {
     id: 3,
@@ -25,71 +26,121 @@ let nodes = [
     tipo: 'Actuador de Riego',
     fechaInstalacion: '2024-03-10',
     bateria: 67,
-    descripcion: 'Controlador del sistema de riego automático'
+    activo: true
   }
 ]
-
-// Simular delay de red
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const nodeService = {
   // Obtener todos los nodos
   async getAllNodes() {
-    await delay(500) // Simular tiempo de respuesta
-    return [...nodes]
+    try {
+      const response = await axios.get(API_URL)
+      return response.data
+    } catch (error) {
+      // Fallback a mock
+      return [...mockNodes]
+    }
   },
 
   // Obtener un nodo por ID
   async getNodeById(id) {
-    await delay(300)
-    return nodes.find(node => node.id === parseInt(id))
+    try {
+      const response = await axios.get(`${API_URL}/${id}`)
+      return response.data
+    } catch (error) {
+      return mockNodes.find(node => node.id === parseInt(id)) || null
+    }
   },
 
   // Crear un nuevo nodo
   async createNode(nodeData) {
-    await delay(800)
-    const newNode = {
-      id: Date.now(),
-      ...nodeData
+    try {
+      const response = await axios.post(API_URL, nodeData)
+      return response.data
+    } catch (error) {
+      // Mock: crear localmente
+      const newNode = {
+        id: Date.now(),
+        ...nodeData
+      }
+      mockNodes.push(newNode)
+      return newNode
     }
-    nodes.push(newNode)
-    return newNode
   },
 
   // Actualizar un nodo existente
   async updateNode(id, nodeData) {
-    await delay(600)
-    const index = nodes.findIndex(node => node.id === parseInt(id))
-    if (index !== -1) {
-      nodes[index] = { ...nodes[index], ...nodeData }
-      return nodes[index]
+    try {
+      const response = await axios.put(`${API_URL}/${id}`, nodeData)
+      return response.data
+    } catch (error) {
+      const idx = mockNodes.findIndex(node => node.id === parseInt(id))
+      if (idx !== -1) {
+        mockNodes[idx] = { ...mockNodes[idx], ...nodeData }
+        return mockNodes[idx]
+      }
+      return null
     }
-    throw new Error('Nodo no encontrado')
   },
 
-  // Eliminar un nodo
-  async deleteNode(id) {
-    await delay(400)
-    const index = nodes.findIndex(node => node.id === parseInt(id))
-    if (index !== -1) {
-      const deletedNode = nodes[index]
-      nodes.splice(index, 1)
-      return deletedNode
+  // Desactivar un nodo (cambiar activo a false)
+  async deactivateNode(id) {
+    try {
+      const response = await axios.patch(`${API_URL}/${id}`, { activo: false })
+      return response.data
+    } catch (error) {
+      const idx = mockNodes.findIndex(node => node.id === parseInt(id))
+      if (idx !== -1) {
+        mockNodes[idx].activo = false
+        return mockNodes[idx]
+      }
+      return null
     }
-    throw new Error('Nodo no encontrado')
   },
 
-  // Generar código único para nodo
+  // Activar un nodo (cambiar activo a true)
+  async activateNode(id) {
+    try {
+      const response = await axios.patch(`${API_URL}/${id}`, { activo: true })
+      return response.data
+    } catch (error) {
+      const idx = mockNodes.findIndex(node => node.id === parseInt(id))
+      if (idx !== -1) {
+        mockNodes[idx].activo = true
+        return mockNodes[idx]
+      }
+      return null
+    }
+  },
+
+  // Generar código único para nodo (esto debería hacerlo el backend en producción)
   generateNodeCode() {
-    const existingCodes = nodes.map(node => node.codigo)
+    // Si hay backend, lo ideal es que el backend genere el código
+    // Aquí solo para mock
+    const existingCodes = mockNodes.map(node => node.codigo)
     let counter = 1
     let newCode = `NODO-${counter.toString().padStart(3, '0')}`
-    
     while (existingCodes.includes(newCode)) {
       counter++
       newCode = `NODO-${counter.toString().padStart(3, '0')}`
     }
-    
     return newCode
+  },
+
+  // Eliminar un nodo
+  async deleteNode(id) {
+    try {
+      const response = await axios.delete(`${API_URL}/${id}`)
+      return response.data
+    } catch (error) {
+      // Mock: eliminar localmente
+      const idx = mockNodes.findIndex(node => node.id === parseInt(id))
+      if (idx !== -1) {
+        const deleted = mockNodes[idx]
+        mockNodes.splice(idx, 1)
+        return deleted
+      }
+      return null
+    }
   }
 } 
