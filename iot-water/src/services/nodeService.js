@@ -37,8 +37,8 @@ export const nodeService = {
       const response = await axios.get(API_URL)
       return response.data
     } catch (error) {
-      // Fallback a mock
-      return [...mockNodes]
+      // Fallback a mock instantáneo
+      return mockNodes.slice()
     }
   },
 
@@ -48,6 +48,7 @@ export const nodeService = {
       const response = await axios.get(`${API_URL}/${id}`)
       return response.data
     } catch (error) {
+      // Mock instantáneo
       return mockNodes.find(node => node.id === parseInt(id)) || null
     }
   },
@@ -58,7 +59,7 @@ export const nodeService = {
       const response = await axios.post(API_URL, nodeData)
       return response.data
     } catch (error) {
-      // Mock: crear localmente
+      // Mock instantáneo
       const newNode = {
         id: Date.now(),
         ...nodeData
@@ -74,6 +75,7 @@ export const nodeService = {
       const response = await axios.put(`${API_URL}/${id}`, nodeData)
       return response.data
     } catch (error) {
+      // Mock instantáneo
       const idx = mockNodes.findIndex(node => node.id === parseInt(id))
       if (idx !== -1) {
         mockNodes[idx] = { ...mockNodes[idx], ...nodeData }
@@ -89,6 +91,7 @@ export const nodeService = {
       const response = await axios.patch(`${API_URL}/${id}`, { activo: false })
       return response.data
     } catch (error) {
+      // Mock instantáneo
       const idx = mockNodes.findIndex(node => node.id === parseInt(id))
       if (idx !== -1) {
         mockNodes[idx].activo = false
@@ -104,6 +107,7 @@ export const nodeService = {
       const response = await axios.patch(`${API_URL}/${id}`, { activo: true })
       return response.data
     } catch (error) {
+      // Mock instantáneo
       const idx = mockNodes.findIndex(node => node.id === parseInt(id))
       if (idx !== -1) {
         mockNodes[idx].activo = true
@@ -133,7 +137,7 @@ export const nodeService = {
       const response = await axios.delete(`${API_URL}/${id}`)
       return response.data
     } catch (error) {
-      // Mock: eliminar localmente
+      // Mock instantáneo
       const idx = mockNodes.findIndex(node => node.id === parseInt(id))
       if (idx !== -1) {
         const deleted = mockNodes[idx]

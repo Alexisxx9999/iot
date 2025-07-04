@@ -107,11 +107,17 @@ const deleteNode = async (id) => {
 }
 
 const deactivateNode = async (id) => {
+  console.log('deactivateNode llamado', id)
   if (confirm('¿Estás seguro de que quieres desactivar este nodo?')) {
     try {
       await nodeService.deactivateNode(id)
       const idx = nodes.value.findIndex(node => node.id === id)
-      if (idx !== -1) nodes.value[idx] = { ...nodes.value[idx], activo: false }
+      if (idx !== -1) {
+        // Forzar la reactividad de Vue 3
+        nodes.value[idx].activo = false
+        // Crear un nuevo array para asegurar la reactividad
+        nodes.value = [...nodes.value]
+      }
     } catch (error) {
       console.error('Error al desactivar nodo:', error)
       alert('Error al desactivar el nodo. Inténtalo de nuevo.')
@@ -120,11 +126,17 @@ const deactivateNode = async (id) => {
 }
 
 const activateNode = async (id) => {
+  console.log('activateNode llamado', id)
   if (confirm('¿Quieres reactivar este nodo?')) {
     try {
       await nodeService.activateNode(id)
       const idx = nodes.value.findIndex(node => node.id === id)
-      if (idx !== -1) nodes.value[idx] = { ...nodes.value[idx], activo: true }
+      if (idx !== -1) {
+        // Forzar la reactividad de Vue 3
+        nodes.value[idx].activo = true
+        // Crear un nuevo array para asegurar la reactividad
+        nodes.value = [...nodes.value]
+      }
     } catch (error) {
       console.error('Error al reactivar nodo:', error)
       alert('Error al reactivar el nodo. Inténtalo de nuevo.')
